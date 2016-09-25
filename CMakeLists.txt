@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(myo_master)
+project(roboy_hardware)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../flexrayusbinterface/cmake)
 
@@ -22,7 +22,6 @@ include_directories(
 	include/ 
 	${CMAKE_CURRENT_SOURCE_DIR}/../common_utilities/include
 	${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/include
-	${CMAKE_CURRENT_SOURCE_DIR}/../../devel/include
 )
 #==============================================================================
 # Application
