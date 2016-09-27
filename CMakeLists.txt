@@ -22,7 +22,6 @@ include_directories(
 	include/ 
 	${CMAKE_CURRENT_SOURCE_DIR}/../common_utilities/include
 	${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/include
-	${CMAKE_CURRENT_SOURCE_DIR}/../../devel/include
 )
 #==============================================================================
 # Application
@@ -47,9 +46,4 @@ install(FILES
 install(DIRECTORY 
 	launch/
 	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/launch
-)
-
-install(DIRECTORY 
-	worlds/
-	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/worlds
 )

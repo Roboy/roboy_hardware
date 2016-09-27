@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>myo_master</name>
+  <name>roboy_hardware</name>
   <version>0.0.0</version>
-  <description>The myo_master package for controlling roboy with myo_muscles</description>
+  <description>Packages for controlling roboy with myo_muscles</description>
   <maintainer email="simon.trendel@tum.de">Simon Trendel</maintainer>
   <license>BSD</license>
 

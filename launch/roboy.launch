@@ -1,8 +1,8 @@
 <launch>
 	<!-- Load the parameters to the parameter server from the yaml file-->
 	<rosparam file="$(find roboy_controller)/config/roboy_controller.yaml" command="load"/>
-	<node name="myo_master" 
-            pkg="myo_master" 
+	<node name="roboy_hardware" 
+            pkg="roboy_hardware" 
             type="multiJoint" 
             respawn="false"
             output="screen" 
