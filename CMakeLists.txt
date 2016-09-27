@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8.3)
-project(myo_master)
+project(roboy_hardware)
 
 SET(CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/../flexrayusbinterface/cmake)
 
@@ -27,15 +27,15 @@ include_directories(
 #==============================================================================
 # Application
 #==============================================================================
-add_executable(multiJoint src/main.cpp src/roboy.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/src/FlexRayHardwareInterface.cpp)
-add_dependencies(multiJoint common_utilities_gencpp)
-target_link_libraries(multiJoint ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${libftd2xx_LIBRARY} -ldl -lpthread)
+add_executable(roboy src/main.cpp src/roboy.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/src/FlexRayHardwareInterface.cpp)
+add_dependencies(roboy common_utilities_gencpp)
+target_link_libraries(roboy ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${libftd2xx_LIBRARY} -ldl -lpthread)
 
 #==============================================================================
 # Installation
 #==============================================================================
 install( TARGETS    	
-	multiJoint
+	roboy
 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
