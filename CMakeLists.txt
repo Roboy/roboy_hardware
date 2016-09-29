@@ -12,10 +12,15 @@ SET(CMAKE_BUILD_TYPE Debug)
 #==============================================================================
 # Dependencies
 #==============================================================================
+# ros
 find_package(catkin REQUIRED COMPONENTS roscpp controller_manager std_msgs)
 catkin_package(CATKIN_DEPENDS message_runtime)
 
+# libftd2xx
 find_package(libftd2xx)
+
+# pthread
+find_package (Threads)
 
 include_directories(
 	${catkin_INCLUDE_DIRS} 
@@ -26,15 +31,15 @@ include_directories(
 #==============================================================================
 # Application
 #==============================================================================
-add_executable(multiJoint src/main.cpp src/roboy.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/src/FlexRayHardwareInterface.cpp)
-add_dependencies(multiJoint common_utilities_gencpp)
-target_link_libraries(multiJoint ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES} ${libftd2xx_LIBRARY} -ldl -lpthread)
-
+add_executable(roboy src/main.cpp src/roboy.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/src/FlexRayHardwareInterface.cpp)
+add_dependencies(roboy common_utilities_gencpp)
+target_link_libraries(roboy ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES}
+        ${libftd2xx_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
 #==============================================================================
 # Installation
 #==============================================================================
-install( TARGETS    	
-	multiJoint
+install( TARGETS
+        roboy
 	DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
