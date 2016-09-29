@@ -34,7 +34,7 @@ include_directories(
 add_executable(roboy src/main.cpp src/roboy.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/src/FlexRayHardwareInterface.cpp)
 add_dependencies(roboy common_utilities_gencpp)
 target_link_libraries(roboy ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES}
-        ${libftd2xx_LIBRARY} ${CMAKE_THREAD_LIBS_INIT})
+        ${libftd2xx_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} -ldl)
 #==============================================================================
 # Installation
 #==============================================================================
