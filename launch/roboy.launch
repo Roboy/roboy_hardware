@@ -3,7 +3,7 @@
 	<rosparam file="$(find roboy_controller)/config/roboy_controller.yaml" command="load"/>
 	<node name="roboy_hardware" 
             pkg="roboy_hardware" 
-            type="multiJoint" 
+            type="roboy" 
             respawn="false"
             output="screen" 
     />
