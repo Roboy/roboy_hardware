@@ -6,7 +6,11 @@ Roboy::Roboy()
     init_sub = nh.subscribe("/roboy/initialize", 1, &Roboy::initializeControllers, this);
 	record_sub = nh.subscribe("/roboy/record", 1, &Roboy::record, this);
 	steer_recording_sub = nh.subscribe("/roboy/steer_record",1000, &Roboy::steer_record, this);
+
+	resetting_sub=nh.subscribe("/roboy/resetting",1, &Roboy::ResettingSpring, this);
+
 	recordResult_pub = nh.advertise<common_utilities::RecordResult>("/roboy/recordResult",1000);
+
 
 	cmd = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
 	pos = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
@@ -102,6 +106,31 @@ void Roboy::initializeControllers( const common_utilities::Initialize::ConstPtr&
 	initialized = true;
 }
 
+void Roboy::ResettingSpring(const common_utilities::Resetting::ConstPtr& msg){
+
+
+	initialized = false;
+    resetted= false;
+
+		uint size= msg->controllers.size();
+		// vector<string> resource[size];
+        uint ganglion; 
+        uint motor;
+        uint controlmode;
+
+		for (uint i=0; i<size; i++){
+        // resource = msg->controllers[i].resource;
+        ganglion = msg->controllers[i].ganglion;
+        motor = msg->controllers[i].motor;
+        controlmode= msg->controllers[i].controlmode;
+        flexray.relaxSpring(ganglion,motor,controlmode);
+    }
+
+    resetted=true;
+    initialized=true;
+  }
+
+
 void Roboy::read()
 {
     ROS_DEBUG("read");
@@ -193,6 +222,9 @@ void Roboy::main_loop(controller_manager::ControllerManager *ControllerManager)
 			}
 		}
 		// get next state from state machine
+		if (!resetted)
+			currentState= WaitForInitialize;
+		else
 		currentState = NextState(currentState);
     }
 }
