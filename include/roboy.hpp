@@ -10,6 +10,9 @@
 #include <common_utilities/Steer.h>
 #include "common_utilities/Trajectory.h"
 #include "common_utilities/RoboyState.h"
+
+#include "common_utilities/Resetting.h"
+
 // ros
 #include <ros/ros.h>
 #include <controller_manager/controller_manager.h>
@@ -49,6 +52,10 @@ public:
 	 * CB This function initialises the requested motors
 	 */
 	void initializeControllers( const common_utilities::Initialize::ConstPtr& msg );
+ 	/**
+	 * This function resets the sensor displacement of the requested motor
+	 */
+	void ResettingSpring(const common_utilities::Resetting::ConstPtr& msg);
 
     /**
 	 * Read from hardware
@@ -105,7 +112,10 @@ private:
 	double *eff;
 	ros::Time prevTime;
 	int8_t recording;
+	
 	bool initialized = false;
+	bool check = false;
+	bool resetted = true;
 
 	hardware_interface::JointStateInterface jnt_state_interface;
 	hardware_interface::PositionJointInterface jnt_pos_interface;
@@ -113,7 +123,7 @@ private:
 	hardware_interface::EffortJointInterface jnt_eff_interface;
 
     controller_manager::ControllerManager *cm = nullptr;
-	ros::Subscriber steer_recording_sub, init_sub, record_sub;
+	ros::Subscriber steer_recording_sub, init_sub, record_sub, resetting_sub;
 	ros::Publisher recordResult_pub;
 
 	FlexRayHardwareInterface flexray;
