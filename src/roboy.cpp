@@ -3,8 +3,8 @@
 
 Roboy::Roboy()
 {
-    init_sub = nh.subscribe("/roboy/initialize", 1, &Roboy::initializeControllers, this);
-	record_sub = nh.subscribe("/roboy/record", 1, &Roboy::record, this);
+    init_srv = nh.advertiseService("/roboy/initialize", &Roboy::initializeControllers, this);
+	record_srv = nh.advertiseService("/roboy/record", &Roboy::record, this);
 	steer_recording_sub = nh.subscribe("/roboy/steer_record",1000, &Roboy::steer_record, this);
 	recordResult_pub = nh.advertise<common_utilities::RecordResult>("/roboy/recordResult",1000);
 
@@ -18,7 +18,8 @@ Roboy::~Roboy()
 {
 }
 
-void Roboy::initializeControllers( const common_utilities::Initialize::ConstPtr& msg )
+bool Roboy::initializeControllers( common_utilities::Initialize::Request &req,
+								   common_utilities::Initialize::Response &res )
 {
     initialized = false;
     while(flexray.checkNumberOfConnectedGanglions()>6){
@@ -27,38 +28,39 @@ void Roboy::initializeControllers( const common_utilities::Initialize::ConstPtr&
     ROS_DEBUG("Flexray interface says %d ganglions are connected", flexray.checkNumberOfConnectedGanglions());
 
     vector<string> start_controllers;
-    for (uint i=0; i<msg->controllers.size(); i++){
-        string resource = msg->controllers[i].resource;
-        uint ganglion = msg->controllers[i].ganglion;
-        uint motor = msg->controllers[i].motor;
+    for (uint i=0; i<req.idList.size(); i++){
+        char resource[100];
+		sprintf(resource, "motor%d", req.idList[i]);
+        uint ganglion = req.idList[i]/4;
+        uint motor = req.idList[i]%4;
 
         // connect and register the joint state interface
         start_controllers.push_back(resource);
-		hardware_interface::JointStateHandle state_handle(resource, &pos[msg->controllers[i].id], &vel[msg->controllers[i].id], &eff[msg->controllers[i].id]);
+		hardware_interface::JointStateHandle state_handle(resource, &pos[req.idList[i]], &vel[req.idList[i]], &eff[req.idList[i]]);
 		jnt_state_interface.registerHandle(state_handle);
 
-		switch((uint)msg->controllers[i].controlmode){
+		switch((uint)req.controlmode[i]){
 			case 1: {
-				ROS_INFO("%s position controller ganglion %d motor %d", resource.c_str(), ganglion, motor);
+				ROS_INFO("%s position controller ganglion %d motor %d", resource, ganglion, motor);
 				flexray.initPositionControl(ganglion, motor);
 				// connect and register the joint position interface
-				hardware_interface::JointHandle pos_handle(jnt_state_interface.getHandle(resource), &cmd[msg->controllers[i].id]);
+				hardware_interface::JointHandle pos_handle(jnt_state_interface.getHandle(resource), &cmd[req.idList[i]]);
 				jnt_pos_interface.registerHandle(pos_handle);
 				break;
 			}
 			case 2: {
-				ROS_INFO("%s velocity controller ganglion %d motor %d", resource.c_str(), ganglion, motor);
+				ROS_INFO("%s velocity controller ganglion %d motor %d", resource, ganglion, motor);
 				flexray.initVelocityControl(ganglion, motor);
 				// connect and register the joint position interface
-				hardware_interface::JointHandle vel_handle(jnt_state_interface.getHandle(resource), &cmd[msg->controllers[i].id]);
+				hardware_interface::JointHandle vel_handle(jnt_state_interface.getHandle(resource), &cmd[req.idList[i]]);
 				jnt_vel_interface.registerHandle(vel_handle);
 				break;
 			}
 			case 3: {
-				ROS_INFO("%s force controller ganglion %d motor %d", resource.c_str(), ganglion, motor);
+				ROS_INFO("%s force controller ganglion %d motor %d", resource, ganglion, motor);
 				flexray.initForceControl(ganglion, motor);
 				// connect and register the joint position interface
-				hardware_interface::JointHandle eff_handle(jnt_state_interface.getHandle(resource), &cmd[msg->controllers[i].id]);
+				hardware_interface::JointHandle eff_handle(jnt_state_interface.getHandle(resource), &cmd[req.idList[i]]);
 				jnt_eff_interface.registerHandle(eff_handle);
 				break;
 			}
@@ -93,13 +95,14 @@ void Roboy::initializeControllers( const common_utilities::Initialize::ConstPtr&
 
     ROS_INFO("Resources registered to hardware interface:\n%s", str.c_str());
     if(!loadControllers(start_controllers))
-        return;
+        return false;
 
     ROS_INFO("Starting controllers now...");
     if(!startControllers(start_controllers))
-        ROS_WARN("could not start POSITION CONTROLLERS, try starting via /controller_manager/switch_controller service");
+        ROS_WARN("could not start controllers, try starting via /controller_manager/switch_controller service");
 
 	initialized = true;
+    return true;
 }
 
 void Roboy::read()
@@ -250,26 +253,26 @@ ActionState Roboy::NextState(ActionState s)
 	return newstate;
 }
 
-void Roboy::record( const common_utilities::Record::ConstPtr &msg ) {
+bool Roboy::record( common_utilities::Record::Request &req,
+                    common_utilities::Record::Response &res) {
 	currentState = Recording;
 	std::vector<std::vector<float>> trajectories;
 	recording = PLAY_TRAJECTORY;
 	vector<int> controllers;
 	vector<int> controlmode;
-	for(auto controller:msg->controllers){
+	for(auto controller:req.controllers){
 		controllers.push_back(controller.id);
 		controlmode.push_back(controller.controlmode);
 	}
-	float averageSamplingTime = flexray.recordTrajectories(msg->sampleRate, trajectories, controllers, controlmode, &recording);
-	common_utilities::RecordResult res;
-	res.trajectories.resize(msg->controllers.size());
-	for(uint m=0; m<msg->controllers.size(); m++){
-		res.trajectories[m].id = msg->controllers[m].id;
-		res.trajectories[m].waypoints = trajectories[msg->controllers[m].id];
+	float averageSamplingTime = flexray.recordTrajectories(req.sampleRate, trajectories, controllers, controlmode, &recording);
+	res.trajectories.resize(req.controllers.size());
+	for(uint m=0; m<req.controllers.size(); m++){
+		res.trajectories[m].id = req.controllers[m].id;
+		res.trajectories[m].waypoints = trajectories[req.controllers[m].id];
 		res.trajectories[m].samplerate = averageSamplingTime;
 	}
-	recordResult_pub.publish(res);
 	currentState = Controlloop;
+    return true;
 }
 
 void Roboy::steer_record(const common_utilities::Steer::ConstPtr& msg){

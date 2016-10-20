@@ -48,7 +48,8 @@ public:
 	/**
 	 * CB This function initialises the requested motors
 	 */
-	void initializeControllers( const common_utilities::Initialize::ConstPtr& msg );
+	bool initializeControllers( common_utilities::Initialize::Request &req,
+								common_utilities::Initialize::Response &res);
 
     /**
 	 * Read from hardware
@@ -92,7 +93,8 @@ private:
 	 * @param req vector<int8> containing requested motor ids
 	 * @param res vector<ControllerStates> cf. CommonDefinitions.h
 	 */
-	void record( const common_utilities::Record::ConstPtr& msg );
+	bool record( common_utilities::Record::Request &req,
+                 common_utilities::Record::Response &res );
 	/**
 	 * SUBSCRIBER enables pause/resume and stop recording
 	 */
@@ -113,7 +115,8 @@ private:
 	hardware_interface::EffortJointInterface jnt_eff_interface;
 
     controller_manager::ControllerManager *cm = nullptr;
-	ros::Subscriber steer_recording_sub, init_sub, record_sub;
+	ros::Subscriber steer_recording_sub;
+    ros::ServiceServer init_srv, record_srv;
 	ros::Publisher recordResult_pub;
 
 	FlexRayHardwareInterface flexray;
