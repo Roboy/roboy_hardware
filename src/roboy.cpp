@@ -6,7 +6,6 @@ Roboy::Roboy()
     init_srv = nh.advertiseService("/roboy/initialize", &Roboy::initializeControllers, this);
 	record_srv = nh.advertiseService("/roboy/record", &Roboy::record, this);
 	steer_recording_sub = nh.subscribe("/roboy/steer_record",1000, &Roboy::steer_record, this);
-	recordResult_pub = nh.advertise<common_utilities::RecordResult>("/roboy/recordResult",1000);
 
 	cmd = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
 	pos = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
