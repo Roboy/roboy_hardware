@@ -11,6 +11,16 @@ Roboy::Roboy()
 	pos = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
 	vel = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
 	eff = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
+
+    displacement_pub.resize(NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION);
+    int i=0;
+    for (int ganglion = 0; ganglion < NUMBER_OF_GANGLIONS; ganglion++) {
+        for (int motor = 0; motor < NUMBER_OF_JOINTS_PER_GANGLION; motor++) {
+            char topic[100];
+            sprintf(topic, "/roboy/ganglion%d/motor%d/displacement", ganglion, motor);
+            displacement_pub[i++] = nh.advertise<std_msgs::Float32>(topic, 100);
+        }
+    }
 }
 
 Roboy::~Roboy()
@@ -124,8 +134,11 @@ void Roboy::read()
 			polyPar[0]=0; polyPar[1]=0.237536; polyPar[2]=-0.000032; polyPar[3]=0;
 			float tendonDisplacement = flexray.GanglionData[ganglion].muscleState[motor].tendonDisplacement;
 			eff[i] = polyPar[0] + polyPar[1] * tendonDisplacement + polyPar[2] * powf(tendonDisplacement, 2.0f) + polyPar[3] * powf(tendonDisplacement, 3.0f);
-
-			i++;
+            // publish displacement
+            std_msgs::Float32 msg;
+            msg.data = flexray.GanglionData[ganglion].muscleState[motor].tendonDisplacement / 32768.0f;
+            displacement_pub[i].publish(msg);
+            i++;
         }
     }
 }
@@ -154,7 +167,7 @@ void Roboy::main_loop(controller_manager::ControllerManager *ControllerManager)
 
     // Control loop
 	ros::Time prev_time = ros::Time::now();
-    ros::Rate rate(10);
+    ros::Rate rate(100);
 
     ros::AsyncSpinner spinner(2);
     spinner.start();

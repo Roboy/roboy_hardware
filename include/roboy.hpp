@@ -18,6 +18,7 @@
 #include <hardware_interface/robot_hw.h>
 #include <ros/callback_queue.h>
 #include <ros/callback_queue_interface.h>
+#include <std_msgs/Float32.h>
 // std
 #include <vector>
 #include <mutex>
@@ -121,7 +122,9 @@ private:
 	FlexRayHardwareInterface flexray;
 	common_utilities::RoboyState roboyStateMsg;
 
-	//! current state of roboy
+    vector<ros::Publisher> displacement_pub;
+
+    //! current state of roboy
 	ActionState currentState;
 	/**
 	 * Statemachine function for next state
