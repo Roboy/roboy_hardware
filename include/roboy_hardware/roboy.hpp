@@ -1,9 +1,7 @@
 #pragma once
 #include "flexrayusbinterface/FlexRayHardwareInterface.hpp"
 #include "flexrayusbinterface/CommunicationData.h"
-#include "CommonDefinitions.h"
-// common definitions
-#include "CommonDefinitions.h"
+#include "common_utilities/CommonDefinitions.h"
 #include "common_utilities/Initialize.h"
 #include "common_utilities/EmergencyStop.h"
 #include "common_utilities/Record.h"
