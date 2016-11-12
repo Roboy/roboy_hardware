@@ -1,4 +1,3 @@
-#include <CommunicationData.h>
 #include "roboy.hpp"
 
 Roboy::Roboy()
