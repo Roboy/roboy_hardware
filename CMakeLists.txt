@@ -13,8 +13,8 @@ SET(CMAKE_BUILD_TYPE Debug)
 # Dependencies
 #==============================================================================
 # ros
-find_package(catkin REQUIRED COMPONENTS roscpp controller_manager std_msgs)
-catkin_package(CATKIN_DEPENDS message_runtime)
+find_package(catkin REQUIRED COMPONENTS flexrayusbinterface common_utilities
+		roscpp controller_manager std_msgs)
 
 # libftd2xx
 find_package(libftd2xx)
@@ -22,16 +22,19 @@ find_package(libftd2xx)
 # pthread
 find_package (Threads)
 
+catkin_package(DEPENDS libftd2xx
+		CATKIN_DEPENDS common_utilities flexrayusbinterface message_runtime)
+
+message(STATUS "HERE ${catkin_INCLUDE_DIRS} ")
+
 include_directories(
 	${catkin_INCLUDE_DIRS} 
-	include/ 
-	${CMAKE_CURRENT_SOURCE_DIR}/../common_utilities/include
-	${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/include
+	include
 )
 #==============================================================================
 # Application
 #==============================================================================
-add_executable(roboy src/main.cpp src/roboy.cpp ${CMAKE_CURRENT_SOURCE_DIR}/../flexrayusbinterface/src/FlexRayHardwareInterface.cpp)
+add_executable(roboy src/main.cpp src/roboy.cpp)
 add_dependencies(roboy common_utilities_gencpp)
 target_link_libraries(roboy ${catkin_LIBRARIES} ${GAZEBO_LIBRARIES} ${Boost_LIBRARIES}
         ${libftd2xx_LIBRARY} ${CMAKE_THREAD_LIBS_INIT} -ldl)
