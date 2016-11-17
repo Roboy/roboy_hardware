@@ -2,7 +2,7 @@
 #include "flexrayusbinterface/FlexRayHardwareInterface.hpp"
 #include "flexrayusbinterface/CommunicationData.h"
 #include "common_utilities/CommonDefinitions.h"
-// ros messages
+#include "roboy_hardware/roboy.hpp"
 #include "common_utilities/Initialize.h"
 #include "common_utilities/EmergencyStop.h"
 #include "common_utilities/Record.h"
@@ -23,6 +23,7 @@
 #include <thread>
 #include <vector>
 #include <mutex>
+#include <thread>
 
 using namespace std;
 
