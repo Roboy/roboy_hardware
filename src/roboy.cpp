@@ -101,6 +101,10 @@ bool Roboy::initializeControllers( common_utilities::Initialize::Request &req,
 		str.append(" ");
 	}
 
+    ROS_INFO("Stopping and unloading the controllers that are already running");
+    stopControllers(start_controllers);
+    unloadControllers(start_controllers);
+
     ROS_INFO("Resources registered to hardware interface:\n%s", str.c_str());
     if(!loadControllers(start_controllers))
         return false;
