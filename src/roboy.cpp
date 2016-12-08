@@ -4,6 +4,7 @@ Roboy::Roboy()
 {
     init_srv = nh.advertiseService("/roboy/initialize", &Roboy::initializeControllers, this);
 	record_srv = nh.advertiseService("/roboy/record", &Roboy::record, this);
+	resetSpring_srv = nh.advertiseService("/roboy/resetSprings", &Roboy::resetSprings, this);
 	steer_recording_sub = nh.subscribe("/roboy/steer_record",1000, &Roboy::steer_record, this);
 
 	cmd = new double[NUMBER_OF_GANGLIONS*NUMBER_OF_JOINTS_PER_GANGLION];
@@ -82,6 +83,8 @@ bool Roboy::initializeControllers( common_utilities::Initialize::Request &req,
 	string str;
 	registerInterface(&jnt_pos_interface);
 	vector<string> resources = jnt_pos_interface.getNames();
+    if(!resources.empty())
+        str.append("position controllers:\n");
 	for(uint i=0; i<resources.size();i++){
 		str.append(resources[i]);
 		str.append(" ");
@@ -89,6 +92,8 @@ bool Roboy::initializeControllers( common_utilities::Initialize::Request &req,
 
 	registerInterface(&jnt_vel_interface);
 	resources = jnt_vel_interface.getNames();
+    if(!resources.empty())
+        str.append("velocity controllers:\n");
 	for(uint i=0; i<resources.size();i++){
 		str.append(resources[i]);
 		str.append(" ");
@@ -96,6 +101,8 @@ bool Roboy::initializeControllers( common_utilities::Initialize::Request &req,
 
 	registerInterface(&jnt_eff_interface);
 	resources = jnt_eff_interface.getNames();
+    if(!resources.empty())
+        str.append("force controllers:\n");
 	for (uint i = 0; i < resources.size(); i++) {
 		str.append(resources[i]);
 		str.append(" ");
@@ -115,6 +122,11 @@ bool Roboy::initializeControllers( common_utilities::Initialize::Request &req,
 
 	initialized = true;
     return true;
+}
+
+bool Roboy::resetSprings(std_srvs::Empty::Request &req,
+                  std_srvs::Empty::Response &res){
+    flexray.relaxSpring(0,0);
 }
 
 void Roboy::read()
@@ -191,7 +203,7 @@ void Roboy::main_loop(controller_manager::ControllerManager *ControllerManager)
                 }
 			}
 			case Controlloop: {
-				ROS_INFO_THROTTLE(10, "%s", state_strings[Controlloop].c_str());
+				ROS_INFO_THROTTLE(5, "%s", state_strings[Controlloop].c_str());
 				const ros::Time time = ros::Time::now();
 				const ros::Duration period = time - prev_time;
 
